@@ -1,8 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock, BikeIcon } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock, BikeIcon, CheckCircle2, Wallet, Smartphone, CreditCard, Building2, Banknote } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { CURRENCY, DELIVERY_CHARGE, DELIVERY_RADIUS_KM, FREE_DELIVERY_OVER, WHATSAPP_NUMBER } from "@/lib/menu";
+
+type PaymentMethod = "cod" | "upi" | "card" | "netbanking" | "wallet";
+const PAYMENT_METHODS: { id: PaymentMethod; label: string; sub: string; Icon: typeof Wallet }[] = [
+  { id: "cod",        label: "Cash on Delivery", sub: "Pay with cash when your order arrives",     Icon: Banknote },
+  { id: "upi",        label: "UPI",              sub: "Google Pay, PhonePe, Paytm, BHIM — coming soon", Icon: Smartphone },
+  { id: "card",       label: "Credit / Debit Card", sub: "Visa, Mastercard, RuPay — coming soon",  Icon: CreditCard },
+  { id: "netbanking", label: "Net Banking",      sub: "All major Indian banks — coming soon",       Icon: Building2 },
+  { id: "wallet",     label: "Wallet",           sub: "Paytm / Amazon Pay — coming soon",           Icon: Wallet },
+];
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -19,7 +28,9 @@ export const Route = createFileRoute("/cart")({
 function CartPage() {
   const { detailed, subtotal, count, setQty, remove, clear } = useCart();
   const [form, setForm] = useState({ name: "", phone: "", address: "", notes: "" });
+  const [payment, setPayment] = useState<PaymentMethod>("cod");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [placedOrder, setPlacedOrder] = useState<null | { id: string; method: PaymentMethod; total: number; eta: string }>(null);
 
   const deliveryFee = subtotal >= FREE_DELIVERY_OVER ? 0 : DELIVERY_CHARGE;
   const total = subtotal + deliveryFee;
@@ -42,13 +53,41 @@ function CartPage() {
     ? { tone: "info" as const, text: "It's a busy hour at the cafe — orders may take a little longer than usual. Thanks for your patience!" }
     : { tone: "ok" as const, text: "Kitchen is open and accepting orders. Your food will be on its way shortly after you confirm on WhatsApp." };
 
-  if (count === 0) {
+  if (count === 0 && !placedOrder) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-24 text-center">
         <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
         <h1 className="text-3xl font-bold mb-2">Your cart is empty</h1>
         <p className="text-muted-foreground mb-8">Add a few delicious things from our menu to get started.</p>
         <Link to="/menu" className="btn-primary px-6 py-3">Browse menu <ArrowRight className="w-4 h-4" /></Link>
+      </div>
+    );
+  }
+
+  if (placedOrder) {
+    const methodLabel = PAYMENT_METHODS.find((m) => m.id === placedOrder.method)?.label ?? "";
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/15 text-emerald-400 inline-flex items-center justify-center mb-5">
+          <CheckCircle2 className="w-9 h-9" />
+        </div>
+        <h1 className="font-script neon-text text-5xl mb-3">Order placed!</h1>
+        <p className="text-muted-foreground mb-6">Thanks {form.name.split(" ")[0] || "friend"} — we've received your order and started preparing it.</p>
+        <div className="bg-card border border-border rounded-2xl p-6 text-left space-y-2 text-sm">
+          <div className="flex justify-between"><span className="text-muted-foreground">Order ID</span><span className="font-mono font-semibold">{placedOrder.id}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-bold text-primary">{CURRENCY}{placedOrder.total}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span>{methodLabel}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Estimated delivery</span><span>{placedOrder.eta}</span></div>
+          {placedOrder.method !== "cod" && (
+            <div className="mt-3 pt-3 border-t border-border text-xs text-amber-300">
+              Online payment for this method isn't enabled yet. Our team will reach out shortly to confirm payment.
+            </div>
+          )}
+        </div>
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <button onClick={() => { clear(); setPlacedOrder(null); }} className="btn-primary px-6 py-3">Place another order</button>
+          <Link to="/menu" className="px-6 py-3 rounded-md border border-border hover:bg-secondary">Back to menu</Link>
+        </div>
       </div>
     );
   }
@@ -62,18 +101,24 @@ function CartPage() {
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
+    const orderId = "AC-" + Date.now().toString().slice(-6);
+    setPlacedOrder({ id: orderId, method: payment, total, eta: `${etaMin}–${etaMax} min (by ~${readyByStr})` });
+  };
+
+  const sendOnWhatsApp = () => {
     const lines = detailed.map((d) => `• ${d.qty} × ${d.item.name} — ${CURRENCY}${d.lineTotal}`).join("\n");
+    const methodLabel = PAYMENT_METHODS.find((m) => m.id === payment)?.label ?? "";
     const message =
       `*New order — Arun's Cafe*\n\n` +
       `${lines}\n\n` +
       `Subtotal: ${CURRENCY}${subtotal}\n` +
       `Delivery: ${deliveryFee === 0 ? "FREE" : CURRENCY + deliveryFee}\n` +
       `*Total: ${CURRENCY}${total}*\n\n` +
+      `Payment: ${methodLabel}\n` +
       `Name: ${form.name}\n` +
       `Phone: ${form.phone}\n` +
       `Address: ${form.address}\n` +
       (form.notes ? `Notes: ${form.notes}\n` : "");
-
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   };
@@ -160,10 +205,48 @@ function CartPage() {
             <Field label="Phone number" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} error={errors.phone} placeholder="e.g. +91 9XXXXXXXXX" />
             <Field label="Delivery address" value={form.address} onChange={(v) => setForm({ ...form, address: v })} error={errors.address} textarea placeholder="House / flat, street, landmark, area" />
             <Field label="Notes (optional)" value={form.notes} onChange={(v) => setForm({ ...form, notes: v })} placeholder="Less spicy, extra ketchup..." />
+
+            <div className="pt-2">
+              <span className="text-xs font-medium text-muted-foreground">Payment method</span>
+              <div className="mt-2 space-y-2">
+                {PAYMENT_METHODS.map(({ id, label, sub, Icon }) => {
+                  const selected = payment === id;
+                  return (
+                    <label
+                      key={id}
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${
+                        selected ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="payment"
+                        value={id}
+                        checked={selected}
+                        onChange={() => setPayment(id)}
+                        className="sr-only"
+                      />
+                      <span className={`w-9 h-9 rounded-full inline-flex items-center justify-center flex-shrink-0 ${selected ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"}`}>
+                        <Icon className="w-4 h-4" />
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm font-medium">{label}</span>
+                        <span className="block text-[11px] text-muted-foreground">{sub}</span>
+                      </span>
+                      <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? "border-primary bg-primary" : "border-border"}`} />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
             <button type="submit" className="btn-primary w-full py-3 text-base mt-2">
-              Place order via WhatsApp
+              Place order — {CURRENCY}{total}
             </button>
-            <p className="text-[11px] text-muted-foreground text-center">We'll confirm your order on WhatsApp & deliver within ~30–45 min.</p>
+            <button type="button" onClick={sendOnWhatsApp} className="w-full py-2.5 text-sm rounded-md border border-border hover:bg-secondary">
+              Or send order on WhatsApp
+            </button>
+            <p className="text-[11px] text-muted-foreground text-center">We'll confirm your order on call/WhatsApp & deliver within ~30–45 min.</p>
           </form>
         </aside>
       </div>
