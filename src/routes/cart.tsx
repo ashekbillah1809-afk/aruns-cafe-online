@@ -53,6 +53,17 @@ function CartPage() {
     ? { tone: "info" as const, text: "It's a busy hour at the cafe — orders may take a little longer than usual. Thanks for your patience!" }
     : { tone: "ok" as const, text: "Kitchen is open and accepting orders. Your food will be on its way shortly after you confirm on WhatsApp." };
 
+  if (count === 0 && !placedOrder) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-24 text-center">
+        <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+        <h1 className="text-3xl font-bold mb-2">Your cart is empty</h1>
+        <p className="text-muted-foreground mb-8">Add a few delicious things from our menu to get started.</p>
+        <Link to="/menu" className="btn-primary px-6 py-3">Browse menu <ArrowRight className="w-4 h-4" /></Link>
+      </div>
+    );
+  }
+
   if (placedOrder) {
     const methodLabel = PAYMENT_METHODS.find((m) => m.id === placedOrder.method)?.label ?? "";
     return (
