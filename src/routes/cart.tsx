@@ -24,6 +24,24 @@ function CartPage() {
   const deliveryFee = subtotal >= FREE_DELIVERY_OVER ? 0 : DELIVERY_CHARGE;
   const total = subtotal + deliveryFee;
 
+  // Estimated delivery time — base prep + per-item handling, with a small rush-hour bump
+  const now = new Date();
+  const hour = now.getHours();
+  const isRushHour = (hour >= 12 && hour < 14) || (hour >= 19 && hour < 22);
+  const isOpen = hour >= 9 && hour < 23;
+  const prepMin = 15 + Math.min(15, Math.max(0, count - 1) * 2) + (isRushHour ? 8 : 0);
+  const rideMin = 12;
+  const etaMin = prepMin + rideMin;
+  const etaMax = etaMin + 10;
+  const readyBy = new Date(now.getTime() + etaMax * 60000);
+  const readyByStr = readyBy.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+  const statusMessage = !isOpen
+    ? { tone: "warn" as const, text: "We're closed right now (9 AM – 11 PM). You can still place your order — we'll start preparing it as soon as we open." }
+    : isRushHour
+    ? { tone: "info" as const, text: "It's a busy hour at the cafe — orders may take a little longer than usual. Thanks for your patience!" }
+    : { tone: "ok" as const, text: "Kitchen is open and accepting orders. Your food will be on its way shortly after you confirm on WhatsApp." };
+
   if (count === 0) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-24 text-center">
