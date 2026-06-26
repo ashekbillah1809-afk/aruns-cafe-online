@@ -205,10 +205,48 @@ function CartPage() {
             <Field label="Phone number" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} error={errors.phone} placeholder="e.g. +91 9XXXXXXXXX" />
             <Field label="Delivery address" value={form.address} onChange={(v) => setForm({ ...form, address: v })} error={errors.address} textarea placeholder="House / flat, street, landmark, area" />
             <Field label="Notes (optional)" value={form.notes} onChange={(v) => setForm({ ...form, notes: v })} placeholder="Less spicy, extra ketchup..." />
+
+            <div className="pt-2">
+              <span className="text-xs font-medium text-muted-foreground">Payment method</span>
+              <div className="mt-2 space-y-2">
+                {PAYMENT_METHODS.map(({ id, label, sub, Icon }) => {
+                  const selected = payment === id;
+                  return (
+                    <label
+                      key={id}
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${
+                        selected ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="payment"
+                        value={id}
+                        checked={selected}
+                        onChange={() => setPayment(id)}
+                        className="sr-only"
+                      />
+                      <span className={`w-9 h-9 rounded-full inline-flex items-center justify-center flex-shrink-0 ${selected ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground"}`}>
+                        <Icon className="w-4 h-4" />
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm font-medium">{label}</span>
+                        <span className="block text-[11px] text-muted-foreground">{sub}</span>
+                      </span>
+                      <span className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${selected ? "border-primary bg-primary" : "border-border"}`} />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
             <button type="submit" className="btn-primary w-full py-3 text-base mt-2">
-              Place order via WhatsApp
+              Place order — {CURRENCY}{total}
             </button>
-            <p className="text-[11px] text-muted-foreground text-center">We'll confirm your order on WhatsApp & deliver within ~30–45 min.</p>
+            <button type="button" onClick={sendOnWhatsApp} className="w-full py-2.5 text-sm rounded-md border border-border hover:bg-secondary">
+              Or send order on WhatsApp
+            </button>
+            <p className="text-[11px] text-muted-foreground text-center">We'll confirm your order on call/WhatsApp & deliver within ~30–45 min.</p>
           </form>
         </aside>
       </div>
