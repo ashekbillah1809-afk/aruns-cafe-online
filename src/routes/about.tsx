@@ -24,7 +24,7 @@ function About() {
       <div className="rounded-3xl overflow-hidden border border-border mb-12">
         <img src={storefront.url} alt="Arun's Cafe storefront" className="w-full h-auto" />
       </div>
-      <div className="prose prose-invert max-w-none text-muted-foreground space-y-5 text-base leading-relaxed">
+      <div className="max-w-none text-muted-foreground space-y-5 text-base leading-relaxed">
         <p>
           Arun's Cafe started with a simple idea — make the kind of food and coffee you'd want to share with a friend, at prices that don't make you flinch. From slow-brewed masala chai to wood-fired pizzas and indulgent cold coffees, every dish on our menu is made fresh, the moment you order.
         </p>
