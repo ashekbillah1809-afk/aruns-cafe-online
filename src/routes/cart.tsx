@@ -53,13 +53,30 @@ function CartPage() {
     ? { tone: "info" as const, text: "It's a busy hour at the cafe — orders may take a little longer than usual. Thanks for your patience!" }
     : { tone: "ok" as const, text: "Kitchen is open and accepting orders. Your food will be on its way shortly after you confirm on WhatsApp." };
 
-  if (count === 0) {
+  if (placedOrder) {
+    const methodLabel = PAYMENT_METHODS.find((m) => m.id === placedOrder.method)?.label ?? "";
     return (
-      <div className="max-w-3xl mx-auto px-4 py-24 text-center">
-        <ShoppingBag className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-        <h1 className="text-3xl font-bold mb-2">Your cart is empty</h1>
-        <p className="text-muted-foreground mb-8">Add a few delicious things from our menu to get started.</p>
-        <Link to="/menu" className="btn-primary px-6 py-3">Browse menu <ArrowRight className="w-4 h-4" /></Link>
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center">
+        <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/15 text-emerald-400 inline-flex items-center justify-center mb-5">
+          <CheckCircle2 className="w-9 h-9" />
+        </div>
+        <h1 className="font-script neon-text text-5xl mb-3">Order placed!</h1>
+        <p className="text-muted-foreground mb-6">Thanks {form.name.split(" ")[0] || "friend"} — we've received your order and started preparing it.</p>
+        <div className="bg-card border border-border rounded-2xl p-6 text-left space-y-2 text-sm">
+          <div className="flex justify-between"><span className="text-muted-foreground">Order ID</span><span className="font-mono font-semibold">{placedOrder.id}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-bold text-primary">{CURRENCY}{placedOrder.total}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span>{methodLabel}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">Estimated delivery</span><span>{placedOrder.eta}</span></div>
+          {placedOrder.method !== "cod" && (
+            <div className="mt-3 pt-3 border-t border-border text-xs text-amber-300">
+              Online payment for this method isn't enabled yet. Our team will reach out shortly to confirm payment.
+            </div>
+          )}
+        </div>
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <button onClick={() => { clear(); setPlacedOrder(null); }} className="btn-primary px-6 py-3">Place another order</button>
+          <Link to="/menu" className="px-6 py-3 rounded-md border border-border hover:bg-secondary">Back to menu</Link>
+        </div>
       </div>
     );
   }
@@ -73,18 +90,24 @@ function CartPage() {
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
+    const orderId = "AC-" + Date.now().toString().slice(-6);
+    setPlacedOrder({ id: orderId, method: payment, total, eta: `${etaMin}–${etaMax} min (by ~${readyByStr})` });
+  };
+
+  const sendOnWhatsApp = () => {
     const lines = detailed.map((d) => `• ${d.qty} × ${d.item.name} — ${CURRENCY}${d.lineTotal}`).join("\n");
+    const methodLabel = PAYMENT_METHODS.find((m) => m.id === payment)?.label ?? "";
     const message =
       `*New order — Arun's Cafe*\n\n` +
       `${lines}\n\n` +
       `Subtotal: ${CURRENCY}${subtotal}\n` +
       `Delivery: ${deliveryFee === 0 ? "FREE" : CURRENCY + deliveryFee}\n` +
       `*Total: ${CURRENCY}${total}*\n\n` +
+      `Payment: ${methodLabel}\n` +
       `Name: ${form.name}\n` +
       `Phone: ${form.phone}\n` +
       `Address: ${form.address}\n` +
       (form.notes ? `Notes: ${form.notes}\n` : "");
-
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   };
