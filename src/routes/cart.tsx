@@ -1,8 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock, BikeIcon } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock, BikeIcon, CheckCircle2, Wallet, Smartphone, CreditCard, Building2, Banknote } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { CURRENCY, DELIVERY_CHARGE, DELIVERY_RADIUS_KM, FREE_DELIVERY_OVER, WHATSAPP_NUMBER } from "@/lib/menu";
+
+type PaymentMethod = "cod" | "upi" | "card" | "netbanking" | "wallet";
+const PAYMENT_METHODS: { id: PaymentMethod; label: string; sub: string; Icon: typeof Wallet }[] = [
+  { id: "cod",        label: "Cash on Delivery", sub: "Pay with cash when your order arrives",     Icon: Banknote },
+  { id: "upi",        label: "UPI",              sub: "Google Pay, PhonePe, Paytm, BHIM — coming soon", Icon: Smartphone },
+  { id: "card",       label: "Credit / Debit Card", sub: "Visa, Mastercard, RuPay — coming soon",  Icon: CreditCard },
+  { id: "netbanking", label: "Net Banking",      sub: "All major Indian banks — coming soon",       Icon: Building2 },
+  { id: "wallet",     label: "Wallet",           sub: "Paytm / Amazon Pay — coming soon",           Icon: Wallet },
+];
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
