@@ -1,12 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Phone, MessageCircle, Clock, MapPin } from "lucide-react";
-import { DELIVERY_RADIUS_KM, WHATSAPP_NUMBER } from "@/lib/menu";
+import {
+  DELIVERY_RADIUS_KM,
+  WHATSAPP_NUMBER,
+  PHONE_PRIMARY,
+  PHONE_SECONDARY,
+  ADDRESS_LINE_1,
+  ADDRESS_LINE_2,
+  MAPS_URL,
+} from "@/lib/menu";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — Arun's Cafe" },
-      { name: "description", content: "Get in touch with Arun's Cafe for orders, reservations or feedback. Open 10 AM – 11 PM, every day." },
+      { title: "Contact — Arun's Cafe, Basirhat" },
+      { name: "description", content: "Visit Arun's Cafe at Champapukur Road, Atghara, Basirhat, West Bengal 743291. Call 7001983447 or 8250202652 to order." },
       { property: "og:title", content: "Contact Arun's Cafe" },
       { property: "og:description", content: "Reach Arun's Cafe by phone or WhatsApp." },
     ],
@@ -15,7 +23,6 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
-  const phone = "+" + WHATSAPP_NUMBER;
   return (
     <div className="max-w-4xl mx-auto px-4 py-16">
       <header className="text-center mb-12">
@@ -27,14 +34,32 @@ function ContactPage() {
       </header>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <Card icon={Phone} title="Call us" lines={[phone]} href={`tel:${phone}`} cta="Tap to call" />
-        <Card icon={MessageCircle} title="WhatsApp" lines={["Quickest way to reach us"]} href={`https://wa.me/${WHATSAPP_NUMBER}`} cta="Open WhatsApp" />
-        <Card icon={Clock} title="Hours" lines={["Mon – Sun", "10:00 AM – 11:00 PM"]} />
-        <Card icon={MapPin} title="Delivery" lines={[`Anywhere within ${DELIVERY_RADIUS_KM} km of the cafe`]} />
-      </div>
-
-      <div className="mt-10 text-center text-sm text-muted-foreground">
-        For dine-in directions, please call us — we'll guide you straight to the door.
+        <Card
+          icon={MapPin}
+          title="Visit us"
+          lines={[ADDRESS_LINE_1, ADDRESS_LINE_2]}
+          href={MAPS_URL}
+          cta="Open in Google Maps"
+        />
+        <Card
+          icon={Phone}
+          title="Call us"
+          lines={[PHONE_PRIMARY, PHONE_SECONDARY]}
+          href={`tel:${PHONE_PRIMARY}`}
+          cta="Tap to call"
+        />
+        <Card
+          icon={MessageCircle}
+          title="WhatsApp"
+          lines={["Quickest way to reach us & order"]}
+          href={`https://wa.me/${WHATSAPP_NUMBER}`}
+          cta="Open WhatsApp"
+        />
+        <Card
+          icon={Clock}
+          title="Hours & Delivery"
+          lines={["Mon – Sun, 10 AM – 11 PM", `Home delivery within ${DELIVERY_RADIUS_KM} km`]}
+        />
       </div>
     </div>
   );

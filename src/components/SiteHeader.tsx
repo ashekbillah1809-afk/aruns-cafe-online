@@ -68,17 +68,20 @@ export function SiteFooter() {
           <p className="text-muted-foreground">Cafe & Restaurant — fresh food, warm vibes, delivered to your doorstep within 10 km.</p>
         </div>
         <div>
-          <div className="font-semibold mb-2">Hours</div>
+          <div className="font-semibold mb-2">Visit</div>
           <ul className="text-muted-foreground space-y-1">
-            <li>Mon – Sun</li>
-            <li>10:00 AM – 11:00 PM</li>
+            <li>Champapukur Road, Atghara</li>
+            <li>Basirhat, West Bengal 743291</li>
+            <li className="pt-1">📞 7001983447</li>
+            <li>📞 8250202652</li>
           </ul>
         </div>
         <div>
-          <div className="font-semibold mb-2">Quick links</div>
-          <ul className="space-y-1">
-            <li><Link to="/menu" className="text-muted-foreground hover:text-primary">Order online</Link></li>
-            <li><Link to="/contact" className="text-muted-foreground hover:text-primary">Contact us</Link></li>
+          <div className="font-semibold mb-2">Hours & Links</div>
+          <ul className="space-y-1 text-muted-foreground">
+            <li>Mon – Sun · 10 AM – 11 PM</li>
+            <li><Link to="/menu" className="hover:text-primary">Order online</Link></li>
+            <li><Link to="/contact" className="hover:text-primary">Contact us</Link></li>
           </ul>
         </div>
       </div>
@@ -88,3 +91,4 @@ export function SiteFooter() {
     </footer>
   );
 }
+
