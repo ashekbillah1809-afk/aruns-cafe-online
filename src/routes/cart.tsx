@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock, BikeIcon } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { CURRENCY, DELIVERY_CHARGE, DELIVERY_RADIUS_KM, FREE_DELIVERY_OVER, WHATSAPP_NUMBER } from "@/lib/menu";
 
@@ -23,6 +23,24 @@ function CartPage() {
 
   const deliveryFee = subtotal >= FREE_DELIVERY_OVER ? 0 : DELIVERY_CHARGE;
   const total = subtotal + deliveryFee;
+
+  // Estimated delivery time — base prep + per-item handling, with a small rush-hour bump
+  const now = new Date();
+  const hour = now.getHours();
+  const isRushHour = (hour >= 12 && hour < 14) || (hour >= 19 && hour < 22);
+  const isOpen = hour >= 9 && hour < 23;
+  const prepMin = 15 + Math.min(15, Math.max(0, count - 1) * 2) + (isRushHour ? 8 : 0);
+  const rideMin = 12;
+  const etaMin = prepMin + rideMin;
+  const etaMax = etaMin + 10;
+  const readyBy = new Date(now.getTime() + etaMax * 60000);
+  const readyByStr = readyBy.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+  const statusMessage = !isOpen
+    ? { tone: "warn" as const, text: "We're closed right now (9 AM – 11 PM). You can still place your order — we'll start preparing it as soon as we open." }
+    : isRushHour
+    ? { tone: "info" as const, text: "It's a busy hour at the cafe — orders may take a little longer than usual. Thanks for your patience!" }
+    : { tone: "ok" as const, text: "Kitchen is open and accepting orders. Your food will be on its way shortly after you confirm on WhatsApp." };
 
   if (count === 0) {
     return (
@@ -102,6 +120,40 @@ function CartPage() {
             <div className="border-t border-border my-3"></div>
             <div className="flex justify-between text-base font-bold"><span>Total</span><span className="text-primary">{CURRENCY}{total}</span></div>
           </div>
+
+          {/* Estimated delivery + live status */}
+          <div className="mt-5 rounded-xl border border-primary/30 bg-primary/5 p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/15 inline-flex items-center justify-center text-primary">
+                <BikeIcon className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs uppercase tracking-wider text-muted-foreground">Estimated delivery</div>
+                <div className="font-bold text-lg leading-tight">
+                  {etaMin}–{etaMax} min
+                  <span className="text-xs font-normal text-muted-foreground ml-2 inline-flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> by ~{readyByStr}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 flex items-start gap-2 text-xs">
+              <span className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
+                statusMessage.tone === "ok" ? "bg-emerald-400 animate-pulse"
+                : statusMessage.tone === "info" ? "bg-amber-400 animate-pulse"
+                : "bg-rose-400"
+              }`} />
+              <span className={
+                statusMessage.tone === "ok" ? "text-emerald-300"
+                : statusMessage.tone === "info" ? "text-amber-300"
+                : "text-rose-300"
+              }>
+                {statusMessage.text}
+              </span>
+            </div>
+          </div>
+
+
 
           <form onSubmit={checkout} className="mt-6 space-y-3">
             <Field label="Your name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} error={errors.name} />
