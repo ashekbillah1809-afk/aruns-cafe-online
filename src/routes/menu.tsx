@@ -64,12 +64,11 @@ function MenuCard({ item }: { item: MenuItem }) {
     <article className="bg-card border border-border rounded-2xl overflow-hidden flex flex-col hover:border-primary/60 transition">
       <div className="aspect-[4/3] overflow-hidden relative">
         <img src={item.image} alt={item.name} loading="lazy" className="w-full h-full object-cover" />
-        {item.veg && (
-          <span className="absolute top-3 left-3 bg-background/85 backdrop-blur rounded-md px-2 py-1 text-[10px] font-bold text-emerald-400 inline-flex items-center gap-1">
-            <Leaf className="w-3 h-3" /> VEG
-          </span>
-        )}
+        <span className={`absolute top-3 left-3 backdrop-blur rounded-md px-2 py-1 text-[10px] font-bold inline-flex items-center gap-1 ${item.veg ? "bg-background/85 text-emerald-400" : "bg-background/85 text-red-400"}`}>
+          <Leaf className="w-3 h-3" /> {item.veg ? "VEG" : "NON-VEG"}
+        </span>
       </div>
+
       <div className="p-5 flex flex-col flex-1">
         <h3 className="font-semibold text-lg">{item.name}</h3>
         <p className="text-sm text-muted-foreground mt-1 flex-1">{item.description}</p>
