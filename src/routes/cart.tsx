@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock, BikeIcon } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { CURRENCY, DELIVERY_CHARGE, DELIVERY_RADIUS_KM, FREE_DELIVERY_OVER, WHATSAPP_NUMBER } from "@/lib/menu";
 
