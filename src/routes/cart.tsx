@@ -28,7 +28,9 @@ export const Route = createFileRoute("/cart")({
 function CartPage() {
   const { detailed, subtotal, count, setQty, remove, clear } = useCart();
   const [form, setForm] = useState({ name: "", phone: "", address: "", notes: "" });
+  const [payment, setPayment] = useState<PaymentMethod>("cod");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [placedOrder, setPlacedOrder] = useState<null | { id: string; method: PaymentMethod; total: number; eta: string }>(null);
 
   const deliveryFee = subtotal >= FREE_DELIVERY_OVER ? 0 : DELIVERY_CHARGE;
   const total = subtotal + deliveryFee;
