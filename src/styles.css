@@ -17,6 +17,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -28,73 +29,88 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-neon: var(--neon);
-  --font-display: "Dancing Script", cursive;
+  --color-leaf: var(--leaf);
+  --color-ink: var(--ink);
+  --font-display: "Archivo Black", system-ui, sans-serif;
+  --font-body: "Hind", system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.75rem;
-  /* Warm dark cafe theme inspired by the neon-on-black storefront */
-  --background: oklch(0.16 0.015 60);
-  --foreground: oklch(0.96 0.02 80);
-  --card: oklch(0.21 0.02 60);
-  --card-foreground: oklch(0.96 0.02 80);
-  --popover: oklch(0.21 0.02 60);
-  --popover-foreground: oklch(0.96 0.02 80);
-  --primary: oklch(0.82 0.16 80); /* warm neon gold */
-  --primary-foreground: oklch(0.16 0.015 60);
-  --secondary: oklch(0.28 0.03 60);
-  --secondary-foreground: oklch(0.96 0.02 80);
-  --muted: oklch(0.24 0.02 60);
-  --muted-foreground: oklch(0.72 0.03 80);
-  --accent: oklch(0.65 0.22 30); /* warm coral/red accent */
-  --accent-foreground: oklch(0.98 0.01 80);
+  --radius: 1rem;
+  /* Fresh light-green food-app theme */
+  --background: oklch(0.985 0.01 140);
+  --foreground: oklch(0.20 0.03 150);
+  --ink: oklch(0.16 0.02 150);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.20 0.03 150);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.20 0.03 150);
+  --primary: oklch(0.62 0.17 145);       /* vivid leaf green */
+  --primary-foreground: oklch(0.99 0.01 140);
+  --primary-soft: oklch(0.94 0.06 145);
+  --secondary: oklch(0.96 0.02 140);
+  --secondary-foreground: oklch(0.20 0.03 150);
+  --muted: oklch(0.95 0.015 140);
+  --muted-foreground: oklch(0.46 0.02 150);
+  --accent: oklch(0.78 0.18 90);          /* warm yellow accent */
+  --accent-foreground: oklch(0.18 0.03 150);
   --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.98 0.01 80);
-  --border: oklch(0.3 0.02 60);
-  --input: oklch(0.3 0.02 60);
-  --ring: oklch(0.82 0.16 80);
-  --neon: oklch(0.88 0.18 85);
-}
-
-.dark {
-  /* same as root — site is dark by default */
+  --destructive-foreground: oklch(0.99 0.01 140);
+  --border: oklch(0.91 0.01 140);
+  --input: oklch(0.92 0.01 140);
+  --ring: oklch(0.62 0.17 145);
+  --leaf: oklch(0.62 0.17 145);
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
   }
-  body {
+  html, body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-body);
+  }
+  body {
     background-image:
-      radial-gradient(at 20% 0%, oklch(0.25 0.04 60 / 0.6) 0px, transparent 50%),
-      radial-gradient(at 80% 100%, oklch(0.3 0.08 30 / 0.4) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, oklch(0.94 0.08 145 / 0.6) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, oklch(0.95 0.07 95 / 0.5) 0px, transparent 45%);
     background-attachment: fixed;
   }
-  h1, h2, h3 {
-    letter-spacing: -0.01em;
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    color: var(--color-ink);
   }
 }
 
-@utility font-script {
-  font-family: "Dancing Script", cursive;
+@utility font-display {
+  font-family: "Archivo Black", system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 
-@utility neon-text {
-  color: var(--neon);
-  text-shadow:
-    0 0 4px var(--neon),
-    0 0 12px oklch(0.82 0.16 80 / 0.8),
-    0 0 28px oklch(0.82 0.16 80 / 0.5);
+@utility chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--foreground);
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+@utility chip {
+  &:hover { border-color: var(--primary); color: var(--primary); }
 }
 
-@utility neon-border {
-  box-shadow:
-    0 0 0 1px var(--neon),
-    0 0 12px oklch(0.82 0.16 80 / 0.5),
-    inset 0 0 12px oklch(0.82 0.16 80 / 0.2);
+@utility chip-active {
+  background: var(--ink);
+  color: var(--primary-foreground);
+  border-color: var(--ink);
 }
 
 @utility btn-primary {
@@ -104,14 +120,15 @@
   gap: 0.5rem;
   background: var(--primary);
   color: var(--primary-foreground);
-  padding: 0.625rem 1.25rem;
-  border-radius: var(--radius);
-  font-weight: 600;
+  padding: 0.7rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
-  box-shadow: 0 4px 16px oklch(0.82 0.16 80 / 0.25);
+  box-shadow: 0 8px 24px -8px oklch(0.62 0.17 145 / 0.55);
 }
 @utility btn-primary {
-  &:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  &:hover { filter: brightness(1.06); transform: translateY(-1px); }
   &:active { transform: translateY(0); }
 }
 
@@ -120,14 +137,48 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: transparent;
-  color: var(--foreground);
-  padding: 0.625rem 1.25rem;
-  border-radius: var(--radius);
-  font-weight: 500;
+  background: var(--card);
+  color: var(--ink);
+  padding: 0.7rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 600;
   border: 1px solid var(--border);
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 @utility btn-ghost {
-  &:hover { background: var(--secondary); }
+  &:hover { border-color: var(--ink); }
+}
+
+@utility veg-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+@utility veg-dot {
+  &::after {
+    content: "";
+    width: 7px;
+    height: 7px;
+    background: currentColor;
+    border-radius: 999px;
+  }
+}
+
+@utility card-soft {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 0 oklch(0.9 0.01 140 / 0.6), 0 12px 32px -24px oklch(0.2 0.03 150 / 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+@utility card-soft {
+  &:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+    box-shadow: 0 20px 36px -22px oklch(0.62 0.17 145 / 0.35);
+  }
 }

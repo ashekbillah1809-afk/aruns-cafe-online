@@ -19,7 +19,7 @@ function About() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       <header className="text-center mb-12">
         <div className="text-xs uppercase tracking-[0.2em] text-primary mb-2">Our story</div>
-        <h1 className="font-script neon-text text-5xl sm:text-6xl">About Arun's Cafe</h1>
+        <h1 className="font-display text-5xl sm:text-6xl">About Arun's Cafe</h1>
       </header>
       <div className="rounded-3xl overflow-hidden border border-border mb-12">
         <img src={storefront.url} alt="Arun's Cafe storefront" className="w-full h-auto" />

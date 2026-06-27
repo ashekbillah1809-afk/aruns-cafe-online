@@ -27,7 +27,7 @@ function ContactPage() {
     <div className="max-w-4xl mx-auto px-4 py-16">
       <header className="text-center mb-12">
         <div className="text-xs uppercase tracking-[0.2em] text-primary mb-2">Say hi</div>
-        <h1 className="font-script neon-text text-5xl sm:text-6xl">Contact Us</h1>
+        <h1 className="font-display text-5xl sm:text-6xl">Contact Us</h1>
         <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
           Questions, bulk orders, or just want to chat? We're around.
         </p>
