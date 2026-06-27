@@ -71,7 +71,7 @@ function CartPage() {
         <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/15 text-emerald-400 inline-flex items-center justify-center mb-5">
           <CheckCircle2 className="w-9 h-9" />
         </div>
-        <h1 className="font-script neon-text text-5xl mb-3">Order placed!</h1>
+        <h1 className="font-display text-5xl mb-3">Order placed!</h1>
         <p className="text-muted-foreground mb-6">Thanks {form.name.split(" ")[0] || "friend"} — we've received your order and started preparing it.</p>
         <div className="bg-card border border-border rounded-2xl p-6 text-left space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">Order ID</span><span className="font-mono font-semibold">{placedOrder.id}</span></div>
@@ -125,7 +125,7 @@ function CartPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="font-script neon-text text-5xl sm:text-6xl text-center mb-10">Your Order</h1>
+      <h1 className="font-display text-5xl sm:text-6xl text-center mb-10">Your Order</h1>
       <div className="grid lg:grid-cols-[1fr_380px] gap-8">
         {/* Items */}
         <div className="space-y-4">
