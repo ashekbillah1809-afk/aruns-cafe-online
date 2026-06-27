@@ -22,7 +22,7 @@ export type MenuItem = {
 
 export const DELIVERY_CHARGE = 40;
 export const DELIVERY_RADIUS_KM = 10;
-export const FREE_DELIVERY_OVER = 499;
+export const FREE_DELIVERY_OVER = 299;
 export const CURRENCY = "₹";
 
 // Cafe contact details
