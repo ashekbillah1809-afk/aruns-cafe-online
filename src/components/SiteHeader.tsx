@@ -16,6 +16,9 @@ export function SiteHeader() {
       <Link to="/menu" className="hover:text-primary transition" activeProps={{ className: "text-primary" }} onClick={() => setOpen(false)}>
         Menu
       </Link>
+      <Link to="/dine-in" className="hover:text-primary transition" activeProps={{ className: "text-primary" }} onClick={() => setOpen(false)}>
+        Dine-In
+      </Link>
       <Link to="/about" className="hover:text-primary transition" activeProps={{ className: "text-primary" }} onClick={() => setOpen(false)}>
         About
       </Link>
