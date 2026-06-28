@@ -25,6 +25,15 @@ export const DELIVERY_RADIUS_KM = 10;
 export const FREE_DELIVERY_OVER = 299;
 export const CURRENCY = "₹";
 
+// Dine-in geofence — physical cafe location (Champapukur Rd, Atghara, Basirhat).
+// Adjust these to your exact storefront GPS reading for tighter accuracy.
+export const CAFE_LAT = 22.6571;
+export const CAFE_LNG = 88.8942;
+// Allowed radius (metres) around the cafe for dine-in ordering.
+// 120 m comfortably covers the building + parking; tune as needed.
+export const DINEIN_RADIUS_M = 120;
+export const TABLE_COUNT = 30;
+
 // Cafe contact details
 export const PHONE_PRIMARY = "+917001983447";
 export const PHONE_SECONDARY = "+918250202652";
