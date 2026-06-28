@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock, BikeIcon, CheckCircle2, Wallet, Smartphone, CreditCard, Building2, Banknote } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Clock, BikeIcon, CheckCircle2, Wallet, Smartphone, CreditCard, Building2, Banknote, Utensils } from "lucide-react";
 import { useCart } from "@/lib/cart";
 import { CURRENCY, DELIVERY_CHARGE, DELIVERY_RADIUS_KM, FREE_DELIVERY_OVER, WHATSAPP_NUMBER } from "@/lib/menu";
 
 type PaymentMethod = "cod" | "upi" | "card" | "netbanking" | "wallet";
 const PAYMENT_METHODS: { id: PaymentMethod; label: string; sub: string; Icon: typeof Wallet }[] = [
-  { id: "cod",        label: "Cash on Delivery", sub: "Pay with cash when your order arrives",     Icon: Banknote },
+  { id: "cod",        label: "Cash / Pay at counter", sub: "Pay with cash when you're done",            Icon: Banknote },
   { id: "upi",        label: "UPI",              sub: "Google Pay, PhonePe, Paytm, BHIM — coming soon", Icon: Smartphone },
   { id: "card",       label: "Credit / Debit Card", sub: "Visa, Mastercard, RuPay — coming soon",  Icon: CreditCard },
   { id: "netbanking", label: "Net Banking",      sub: "All major Indian banks — coming soon",       Icon: Building2 },
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/cart")({
   head: () => ({
     meta: [
       { title: "Your Cart — Arun's Cafe" },
-      { name: "description", content: "Review your order and check out for home delivery from Arun's Cafe." },
+      { name: "description", content: "Review your order and check out from Arun's Cafe — dine-in or home delivery." },
       { property: "og:title", content: "Your Cart — Arun's Cafe" },
       { property: "og:description", content: "Review your order and check out." },
     ],
@@ -26,32 +26,33 @@ export const Route = createFileRoute("/cart")({
 });
 
 function CartPage() {
-  const { detailed, subtotal, count, setQty, remove, clear } = useCart();
+  const { detailed, subtotal, count, setQty, remove, clear, mode, dineIn, endDineIn } = useCart();
+  const isDineIn = mode === "dinein";
   const [form, setForm] = useState({ name: "", phone: "", address: "", notes: "" });
   const [payment, setPayment] = useState<PaymentMethod>("cod");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [placedOrder, setPlacedOrder] = useState<null | { id: string; method: PaymentMethod; total: number; eta: string }>(null);
+  const [placedOrder, setPlacedOrder] = useState<null | { id: string; method: PaymentMethod; total: number; eta: string; table?: number }>(null);
 
-  const deliveryFee = subtotal >= FREE_DELIVERY_OVER ? 0 : DELIVERY_CHARGE;
+  const deliveryFee = isDineIn ? 0 : subtotal >= FREE_DELIVERY_OVER ? 0 : DELIVERY_CHARGE;
   const total = subtotal + deliveryFee;
 
-  // Estimated delivery time — base prep + per-item handling, with a small rush-hour bump
+  // Estimated time — dine-in skips ride time
   const now = new Date();
   const hour = now.getHours();
   const isRushHour = (hour >= 12 && hour < 14) || (hour >= 19 && hour < 22);
   const isOpen = hour >= 9 && hour < 23;
-  const prepMin = 15 + Math.min(15, Math.max(0, count - 1) * 2) + (isRushHour ? 8 : 0);
-  const rideMin = 12;
+  const prepMin = 12 + Math.min(15, Math.max(0, count - 1) * 2) + (isRushHour ? 6 : 0);
+  const rideMin = isDineIn ? 0 : 12;
   const etaMin = prepMin + rideMin;
-  const etaMax = etaMin + 10;
+  const etaMax = etaMin + (isDineIn ? 5 : 10);
   const readyBy = new Date(now.getTime() + etaMax * 60000);
   const readyByStr = readyBy.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
   const statusMessage = !isOpen
-    ? { tone: "warn" as const, text: "We're closed right now (9 AM – 11 PM). You can still place your order — we'll start preparing it as soon as we open." }
+    ? { tone: "warn" as const, text: "The kitchen is closed right now (9 AM – 11 PM)." }
     : isRushHour
-    ? { tone: "info" as const, text: "It's a busy hour at the cafe — orders may take a little longer than usual. Thanks for your patience!" }
-    : { tone: "ok" as const, text: "Kitchen is open and accepting orders. Your food will be on its way shortly after you confirm on WhatsApp." };
+    ? { tone: "info" as const, text: "Busy hour at the cafe — orders may take a little longer. Thanks for your patience!" }
+    : { tone: "ok" as const, text: isDineIn ? "Kitchen is open. Your food will arrive at your table shortly after you confirm." : "Kitchen is open and accepting orders." };
 
   if (count === 0 && !placedOrder) {
     return (
@@ -72,15 +73,22 @@ function CartPage() {
           <CheckCircle2 className="w-9 h-9" />
         </div>
         <h1 className="font-display text-5xl mb-3">Order placed!</h1>
-        <p className="text-muted-foreground mb-6">Thanks {form.name.split(" ")[0] || "friend"} — we've received your order and started preparing it.</p>
+        <p className="text-muted-foreground mb-6">
+          {placedOrder.table
+            ? `Thanks! Your order for Table ${placedOrder.table} is in the kitchen.`
+            : `Thanks ${form.name.split(" ")[0] || "friend"} — we've received your order and started preparing it.`}
+        </p>
         <div className="bg-card border border-border rounded-2xl p-6 text-left space-y-2 text-sm">
           <div className="flex justify-between"><span className="text-muted-foreground">Order ID</span><span className="font-mono font-semibold">{placedOrder.id}</span></div>
+          {placedOrder.table && (
+            <div className="flex justify-between"><span className="text-muted-foreground">Table</span><span className="font-bold">#{placedOrder.table}</span></div>
+          )}
           <div className="flex justify-between"><span className="text-muted-foreground">Total</span><span className="font-bold text-primary">{CURRENCY}{placedOrder.total}</span></div>
           <div className="flex justify-between"><span className="text-muted-foreground">Payment</span><span>{methodLabel}</span></div>
-          <div className="flex justify-between"><span className="text-muted-foreground">Estimated delivery</span><span>{placedOrder.eta}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">{placedOrder.table ? "Ready in" : "Estimated delivery"}</span><span>{placedOrder.eta}</span></div>
           {placedOrder.method !== "cod" && (
             <div className="mt-3 pt-3 border-t border-border text-xs text-amber-300">
-              Online payment for this method isn't enabled yet. Our team will reach out shortly to confirm payment.
+              Online payment for this method isn't enabled yet. Our team will collect payment {placedOrder.table ? "at your table" : "shortly"}.
             </div>
           )}
         </div>
@@ -95,37 +103,53 @@ function CartPage() {
   const checkout = (e: React.FormEvent) => {
     e.preventDefault();
     const errs: Record<string, string> = {};
-    if (!form.name.trim()) errs.name = "Please enter your name";
-    if (!/^[0-9+\s-]{8,}$/.test(form.phone.trim())) errs.phone = "Enter a valid phone number";
-    if (form.address.trim().length < 10) errs.address = "Enter your full delivery address";
+    if (!isDineIn) {
+      if (!form.name.trim()) errs.name = "Please enter your name";
+      if (!/^[0-9+\s-]{8,}$/.test(form.phone.trim())) errs.phone = "Enter a valid phone number";
+      if (form.address.trim().length < 10) errs.address = "Enter your full delivery address";
+    }
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
-    const orderId = "AC-" + Date.now().toString().slice(-6);
-    setPlacedOrder({ id: orderId, method: payment, total, eta: `${etaMin}–${etaMax} min (by ~${readyByStr})` });
+    const orderId = (isDineIn ? "AC-T" + dineIn!.tableNumber + "-" : "AC-") + Date.now().toString().slice(-6);
+    setPlacedOrder({
+      id: orderId,
+      method: payment,
+      total,
+      eta: `${etaMin}–${etaMax} min (by ~${readyByStr})`,
+      table: isDineIn ? dineIn!.tableNumber : undefined,
+    });
   };
 
   const sendOnWhatsApp = () => {
     const lines = detailed.map((d) => `• ${d.qty} × ${d.item.name} — ${CURRENCY}${d.lineTotal}`).join("\n");
     const methodLabel = PAYMENT_METHODS.find((m) => m.id === payment)?.label ?? "";
-    const message =
-      `*New order — Arun's Cafe*\n\n` +
-      `${lines}\n\n` +
-      `Subtotal: ${CURRENCY}${subtotal}\n` +
-      `Delivery: ${deliveryFee === 0 ? "FREE" : CURRENCY + deliveryFee}\n` +
-      `*Total: ${CURRENCY}${total}*\n\n` +
-      `Payment: ${methodLabel}\n` +
-      `Name: ${form.name}\n` +
-      `Phone: ${form.phone}\n` +
-      `Address: ${form.address}\n` +
-      (form.notes ? `Notes: ${form.notes}\n` : "");
+    const message = isDineIn
+      ? `*Dine-in order — Arun's Cafe*\n\n*Table #${dineIn!.tableNumber}*\n\n${lines}\n\n*Total: ${CURRENCY}${total}*\n\nPayment: ${methodLabel}\n${form.notes ? `Notes: ${form.notes}\n` : ""}`
+      : `*New order — Arun's Cafe*\n\n${lines}\n\nSubtotal: ${CURRENCY}${subtotal}\nDelivery: ${deliveryFee === 0 ? "FREE" : CURRENCY + deliveryFee}\n*Total: ${CURRENCY}${total}*\n\nPayment: ${methodLabel}\nName: ${form.name}\nPhone: ${form.phone}\nAddress: ${form.address}\n${form.notes ? `Notes: ${form.notes}\n` : ""}`;
     const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-12">
-      <h1 className="font-display text-5xl sm:text-6xl text-center mb-10">Your Order</h1>
+      <h1 className="font-display text-5xl sm:text-6xl text-center mb-4">Your Order</h1>
+
+      {/* Mode banner */}
+      <div className="max-w-2xl mx-auto mb-10 flex items-center justify-center gap-2 text-sm">
+        {isDineIn ? (
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/40 text-primary font-semibold">
+            <Utensils className="w-4 h-4" /> Dine-in · Table #{dineIn!.tableNumber}
+            <button onClick={endDineIn} className="ml-2 text-xs text-muted-foreground hover:text-destructive underline">switch to delivery</button>
+          </div>
+        ) : (
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border text-muted-foreground">
+            <BikeIcon className="w-4 h-4" /> Home delivery
+            <Link to="/dine-in" className="ml-2 text-xs text-primary hover:underline font-semibold">At the cafe? Switch to dine-in</Link>
+          </div>
+        )}
+      </div>
+
       <div className="grid lg:grid-cols-[1fr_380px] gap-8">
         {/* Items */}
         <div className="space-y-4">
@@ -155,25 +179,31 @@ function CartPage() {
           <h2 className="font-semibold text-lg mb-4">Order summary</h2>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{CURRENCY}{subtotal}</span></div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Delivery (within {DELIVERY_RADIUS_KM} km)</span>
-              <span>{deliveryFee === 0 ? <span className="text-emerald-400 font-medium">FREE</span> : `${CURRENCY}${deliveryFee}`}</span>
-            </div>
-            {deliveryFee !== 0 && (
-              <div className="text-xs text-muted-foreground">Add {CURRENCY}{FREE_DELIVERY_OVER - subtotal} more for free delivery</div>
+            {isDineIn ? (
+              <div className="flex justify-between"><span className="text-muted-foreground">Table service</span><span className="text-emerald-400 font-medium">FREE</span></div>
+            ) : (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Delivery (within {DELIVERY_RADIUS_KM} km)</span>
+                  <span>{deliveryFee === 0 ? <span className="text-emerald-400 font-medium">FREE</span> : `${CURRENCY}${deliveryFee}`}</span>
+                </div>
+                {deliveryFee !== 0 && (
+                  <div className="text-xs text-muted-foreground">Add {CURRENCY}{FREE_DELIVERY_OVER - subtotal} more for free delivery</div>
+                )}
+              </>
             )}
             <div className="border-t border-border my-3"></div>
             <div className="flex justify-between text-base font-bold"><span>Total</span><span className="text-primary">{CURRENCY}{total}</span></div>
           </div>
 
-          {/* Estimated delivery + live status */}
+          {/* ETA */}
           <div className="mt-5 rounded-xl border border-primary/30 bg-primary/5 p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/15 inline-flex items-center justify-center text-primary">
-                <BikeIcon className="w-5 h-5" />
+                {isDineIn ? <Utensils className="w-5 h-5" /> : <BikeIcon className="w-5 h-5" />}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-xs uppercase tracking-wider text-muted-foreground">Estimated delivery</div>
+                <div className="text-xs uppercase tracking-wider text-muted-foreground">{isDineIn ? "Ready at your table in" : "Estimated delivery"}</div>
                 <div className="font-bold text-lg leading-tight">
                   {etaMin}–{etaMax} min
                   <span className="text-xs font-normal text-muted-foreground ml-2 inline-flex items-center gap-1">
@@ -198,13 +228,15 @@ function CartPage() {
             </div>
           </div>
 
-
-
           <form onSubmit={checkout} className="mt-6 space-y-3">
-            <Field label="Your name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} error={errors.name} />
-            <Field label="Phone number" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} error={errors.phone} placeholder="e.g. +91 9XXXXXXXXX" />
-            <Field label="Delivery address" value={form.address} onChange={(v) => setForm({ ...form, address: v })} error={errors.address} textarea placeholder="House / flat, street, landmark, area" />
-            <Field label="Notes (optional)" value={form.notes} onChange={(v) => setForm({ ...form, notes: v })} placeholder="Less spicy, extra ketchup..." />
+            {!isDineIn && (
+              <>
+                <Field label="Your name" value={form.name} onChange={(v) => setForm({ ...form, name: v })} error={errors.name} />
+                <Field label="Phone number" type="tel" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} error={errors.phone} placeholder="e.g. +91 9XXXXXXXXX" />
+                <Field label="Delivery address" value={form.address} onChange={(v) => setForm({ ...form, address: v })} error={errors.address} textarea placeholder="House / flat, street, landmark, area" />
+              </>
+            )}
+            <Field label="Notes (optional)" value={form.notes} onChange={(v) => setForm({ ...form, notes: v })} placeholder={isDineIn ? "Less spicy, no onion, extra ketchup..." : "Less spicy, extra ketchup..."} />
 
             <div className="pt-2">
               <span className="text-xs font-medium text-muted-foreground">Payment method</span>
@@ -241,12 +273,14 @@ function CartPage() {
             </div>
 
             <button type="submit" className="btn-primary w-full py-3 text-base mt-2">
-              Place order — {CURRENCY}{total}
+              {isDineIn ? `Send order to kitchen — ${CURRENCY}${total}` : `Place order — ${CURRENCY}${total}`}
             </button>
             <button type="button" onClick={sendOnWhatsApp} className="w-full py-2.5 text-sm rounded-md border border-border hover:bg-secondary">
               Or send order on WhatsApp
             </button>
-            <p className="text-[11px] text-muted-foreground text-center">We'll confirm your order on call/WhatsApp & deliver within ~30–45 min.</p>
+            <p className="text-[11px] text-muted-foreground text-center">
+              {isDineIn ? "Your order goes straight to the kitchen. Pay at the counter or via the selected method." : "We'll confirm your order on call/WhatsApp & deliver within ~30–45 min."}
+            </p>
           </form>
         </aside>
       </div>
